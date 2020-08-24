@@ -6,6 +6,9 @@ namespace HelloThread
 {
     class Program
     {
+        public static int counter = 0;
+        public static int mamasCounter = 0;
+        public static int empireCounter = 0;
         public static void PrintMany(string str, int count)
         {
             for (int i = 0; i < count; i++)
@@ -15,12 +18,46 @@ namespace HelloThread
         }
         static void Main(string[] args)
         {
-            Thread mamas = new Thread(() => PrintMany("mamas", 1000));
-            Thread empire = new Thread(() => PrintMany("empire", 1000));
-            mamas.IsBackground = false;
-            empire.IsBackground = false;
+            Object locker = new object();
+            Thread mamas = new Thread(() => {
+                while(counter < 10000)
+                {
+                    lock (locker)
+                    {
+                        if (counter%2==0)
+                    {
+                        Console.WriteLine("mamas");
+                        ++mamasCounter;
+                    }
+                    //lock (locker)
+                    //{
+                        ++counter;
+                    }
+                }
+            });
+            Thread empire = new Thread(() => {
+                while (counter < 10000)
+                {
+                    lock (locker)
+                    {
+                        if (counter % 2 == 1)
+                    {
+                        Console.WriteLine("empire");
+                        ++empireCounter;
+                    }
+                    //lock (locker)
+                    //{
+                        ++counter;
+                    }
+                }
+            });
             mamas.Start();
             empire.Start();
+
+            mamas.Join();
+            empire.Join();
+
+            Console.WriteLine($"mamas {mamasCounter} and empire {empireCounter}, total is {counter}");
         }
     }
 }
